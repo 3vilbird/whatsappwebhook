@@ -8,9 +8,9 @@
 
 var bodyParser = require("body-parser");
 var express = require("express");
+require("dotenv").config();
 var app = express();
 var xhub = require("express-x-hub");
-
 app.set("port", process.env.PORT || 5000);
 app.listen(app.get("port"));
 
@@ -66,8 +66,9 @@ app.post("/instagram", function (req, res) {
 
 app.listen();
 
-// message to send
+// message to sen
 const sendMessage = (objSender) => {
+  console.log(process.env.AUTHTOKEN);
   let sendrobject = objSender.entry[0].changes[0].value;
   if (sendrobject.hasOwnProperty("messages")) {
     let Receiver = sendrobject["messages"][0]["from"];
@@ -76,8 +77,7 @@ const sendMessage = (objSender) => {
       body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }`,
       headers: {
         "Content-Type": "application/json",
-        Authorization:
-          "Bearer EAAXbaPdNFMUBAN7bUu46E3So7MrSzdYPYUmYmZBVauKT8UFpKNLZCSUmhO6ABk0LHtYPQvny6W6FT66JAZBmaEToFYqTp0vwm1BRbBIZCwpUM9AyiDr28kSG7xiXOzs1wLxTyWUogt264lpiY4F6XEoYDZCzFD254OLVBLsGSyJQjuGGINnx5vF8lzcRwoBmOYQps2rD6hgZDZD",
+        Authorization: `Bearer ${process.env.TOKEN}`,
       },
     })
       .then((res) => res.json())
