@@ -30,6 +30,8 @@ app.get(["/facebook", "/instagram"], function (req, res) {
     req.query["hub.mode"] == "subscribe" &&
     req.query["hub.verify_token"] == token
   ) {
+    received_updates.unshift(req.body);
+
     res.send(req.query["hub.challenge"]);
   } else {
     res.sendStatus(400);
@@ -54,6 +56,7 @@ app.post("/facebook", function (req, res) {
 });
 
 app.post("/instagram", function (req, res) {
+  sendMessage(req.body);
   console.log("Instagram request body:");
   console.log(req.body);
   // Process the Instagram updates here
@@ -62,3 +65,23 @@ app.post("/instagram", function (req, res) {
 });
 
 app.listen();
+
+// message to send
+const sendMessage = (objSender) => {
+  let sendrobject = objSender.entry[0].changes[0].value;
+  if (sendrobject.hasOwnProperty("messages")) {
+    let Receiver = sendrobject["messages"][0]["from"];
+    fetch("https://graph.facebook.com/v17.0/110235552070956/messages", {
+      method: "POST",
+      body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Bearer EAAXbaPdNFMUBAN7bUu46E3So7MrSzdYPYUmYmZBVauKT8UFpKNLZCSUmhO6ABk0LHtYPQvny6W6FT66JAZBmaEToFYqTp0vwm1BRbBIZCwpUM9AyiDr28kSG7xiXOzs1wLxTyWUogt264lpiY4F6XEoYDZCzFD254OLVBLsGSyJQjuGGINnx5vF8lzcRwoBmOYQps2rD6hgZDZD",
+      },
+    })
+      .then((res) => res.json())
+      .then((json) => console.log(json))
+      .catch((err) => console.log(err));
+  }
+};
