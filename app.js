@@ -1,61 +1,64 @@
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 3001;
+/**
+ * Copyright 2016-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-app.get("/", (req, res) => res.type('html').send(html));
+var bodyParser = require("body-parser");
+var express = require("express");
+var app = express();
+var xhub = require("express-x-hub");
 
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.set("port", process.env.PORT || 5000);
+app.listen(app.get("port"));
 
-server.keepAliveTimeout = 120 * 1000;
-server.headersTimeout = 120 * 1000;
+app.use(xhub({ algorithm: "sha1", secret: process.env.APP_SECRET }));
+app.use(bodyParser.json());
 
-const html = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello from Render!</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <script>
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          disableForReducedMotion: true
-        });
-      }, 500);
-    </script>
-    <style>
-      @import url("https://p.typekit.net/p.css?s=1&k=vnd5zic&ht=tk&f=39475.39476.39477.39478.39479.39480.39481.39482&a=18673890&app=typekit&e=css");
-      @font-face {
-        font-family: "neo-sans";
-        src: url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff2"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("opentype");
-        font-style: normal;
-        font-weight: 700;
-      }
-      html {
-        font-family: neo-sans;
-        font-weight: 700;
-        font-size: calc(62rem / 16);
-      }
-      body {
-        background: white;
-      }
-      section {
-        border-radius: 1em;
-        padding: 1em;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-right: -50%;
-        transform: translate(-50%, -50%);
-      }
-    </style>
-  </head>
-  <body>
-    <section>
-      Hello from Render!
-    </section>
-  </body>
-</html>
-`
+var token = process.env.TOKEN || "token";
+var received_updates = [];
+
+app.get("/", function (req, res) {
+  console.log(req);
+  res.send("<pre>" + JSON.stringify(received_updates, null, 2) + "</pre>");
+});
+
+app.get(["/facebook", "/instagram"], function (req, res) {
+  if (
+    req.query["hub.mode"] == "subscribe" &&
+    req.query["hub.verify_token"] == token
+  ) {
+    res.send(req.query["hub.challenge"]);
+  } else {
+    res.sendStatus(400);
+  }
+});
+
+app.post("/facebook", function (req, res) {
+  console.log("Facebook request body:", req.body);
+
+  if (!req.isXHubValid()) {
+    console.log(
+      "Warning - request header X-Hub-Signature not present or invalid"
+    );
+    res.sendStatus(401);
+    return;
+  }
+
+  console.log("request header X-Hub-Signature validated");
+  // Process the Facebook updates here
+  received_updates.unshift(req.body);
+  res.sendStatus(200);
+});
+
+app.post("/instagram", function (req, res) {
+  console.log("Instagram request body:");
+  console.log(req.body);
+  // Process the Instagram updates here
+  received_updates.unshift(req.body);
+  res.sendStatus(200);
+});
+
+app.listen();
