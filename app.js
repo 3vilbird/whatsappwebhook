@@ -74,7 +74,9 @@ const sendMessage = (objSender) => {
     let Receiver = sendrobject["messages"][0]["from"];
     fetch("https://graph.facebook.com/v17.0/110235552070956/messages", {
       method: "POST",
-      body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }`,
+      //  body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }`,
+      body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "text", "text": { "body": "hello from cy=ustome message" } }`,
+
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.AUTHTOKEN}`,
