@@ -77,7 +77,7 @@ const sendMessage = (objSender) => {
       body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }`,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.TOKEN}`,
+        Authorization: `Bearer ${process.env.AUTHTOKEN}`,
       },
     })
       .then((res) => res.json())
