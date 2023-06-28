@@ -5,7 +5,7 @@
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
  */
-
+var openai = require("./api.js");
 var bodyParser = require("body-parser");
 var express = require("express");
 require("dotenv").config();
@@ -67,15 +67,18 @@ app.post("/instagram", function (req, res) {
 app.listen();
 
 // message to sen
-const sendMessage = (objSender) => {
+const sendMessage = async (objSender) => {
   console.log(process.env.AUTHTOKEN);
   let sendrobject = objSender.entry[0].changes[0].value;
   if (sendrobject.hasOwnProperty("messages")) {
+    let message = sendrobject["messages"][0].text.body;
+    let messageRespose = await GetResponseFromGPT(message);
+    // call the api here to get the chat gpt endpoint
     let Receiver = sendrobject["messages"][0]["from"];
     fetch("https://graph.facebook.com/v17.0/110235552070956/messages", {
       method: "POST",
       //  body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }`,
-      body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "text", "text": { "body": "hello from cy=ustome message" } }`,
+      body: `{ "messaging_product": "whatsapp", "to": ${Receiver}, "type": "text", "text": { "body": "${messageRespose}" } }`,
 
       headers: {
         "Content-Type": "application/json",
@@ -87,3 +90,28 @@ const sendMessage = (objSender) => {
       .catch((err) => console.log(err));
   }
 };
+
+const GetResponseFromGPT = async (strMessage) => {
+  //
+  if (!strMessage.endsWith("?")) {
+    strMessage = strMessage + "?";
+  }
+  // call the api here and return the response;
+  return await createCompletion(strMessage);
+};
+
+async function createCompletion(strMessage) {
+  try {
+    const response = await openai.createCompletion({
+      model: "ada:ft-digiphins-innovation-private-limited-2023-06-26-06-04-32",
+      prompt: strMessage || "Does Digiphins provide IT solutions?",
+      max_tokens: 50,
+    });
+    if (response.data) {
+      console.log("choices: ", JSON.stringify(response.data.choices, null, 2));
+      return response.data.choices[0].text;
+    }
+  } catch (err) {
+    console.log("err: ", err);
+  }
+}
