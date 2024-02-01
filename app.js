@@ -37,6 +37,8 @@ app.use(bodyParser.json());
 var token = process.env.TOKEN || "token";
 var received_updates = [];
 
+var lstRidersync = [];
+
 // object that stores authtoken
 
 let objClientToken = {
@@ -45,6 +47,7 @@ let objClientToken = {
 
 app.get("/", function (req, res) {
   console.log(req);
+  // res.send("<pre>" + JSON.stringify(received_updates, null, 2) + "</pre>");
   res.send("<pre>" + JSON.stringify(received_updates, null, 2) + "</pre>");
 });
 
@@ -71,6 +74,11 @@ app.post("/facebook", function (req, res) {
     res.sendStatus(401);
     return;
   }
+
+  app.post("/riderdata", function (req, res) {
+    lstRidersync.unshift(req.body);
+    return;
+  });
 
   console.log("request header X-Hub-Signature validated");
   // Process the Facebook updates here
