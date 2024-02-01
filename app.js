@@ -48,7 +48,7 @@ let objClientToken = {
 app.get("/", function (req, res) {
   console.log(req);
   // res.send("<pre>" + JSON.stringify(received_updates, null, 2) + "</pre>");
-  res.send("<pre>" + JSON.stringify(received_updates, null, 2) + "</pre>");
+  res.send("<pre>" + JSON.stringify(lstRidersync, null, 2) + "</pre>");
 });
 
 app.get(["/facebook", "/instagram", "/riderdata"], function (req, res) {
@@ -65,16 +65,8 @@ app.get(["/facebook", "/instagram", "/riderdata"], function (req, res) {
 });
 
 app.post("/riderdata", function (req, res) {
-  if (
-    req.query["hub.mode"] == "subscribe" &&
-    req.query["hub.verify_token"] == token
-  ) {
-    lstRidersync.unshift(req.body);
-
-    res.send(req.query["hub.challenge"]);
-  } else {
-    res.sendStatus(400);
-  }
+  lstRidersync.unshift(req.body);
+  res.sendStatus(200);
 });
 
 app.post("/facebook", function (req, res) {
