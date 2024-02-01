@@ -51,7 +51,7 @@ app.get("/", function (req, res) {
   res.send("<pre>" + JSON.stringify(received_updates, null, 2) + "</pre>");
 });
 
-app.get(["/facebook", "/instagram"], function (req, res) {
+app.get(["/facebook", "/instagram", "/riderdata"], function (req, res) {
   if (
     req.query["hub.mode"] == "subscribe" &&
     req.query["hub.verify_token"] == token
@@ -87,8 +87,6 @@ app.post("/facebook", function (req, res) {
     res.sendStatus(401);
     return;
   }
-
-
 
   console.log("request header X-Hub-Signature validated");
   // Process the Facebook updates here
