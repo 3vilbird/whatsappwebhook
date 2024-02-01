@@ -64,6 +64,19 @@ app.get(["/facebook", "/instagram"], function (req, res) {
   }
 });
 
+app.post("/riderdata", function (req, res) {
+  if (
+    req.query["hub.mode"] == "subscribe" &&
+    req.query["hub.verify_token"] == token
+  ) {
+    lstRidersync.unshift(req.body);
+
+    res.send(req.query["hub.challenge"]);
+  } else {
+    res.sendStatus(400);
+  }
+});
+
 app.post("/facebook", function (req, res) {
   console.log("Facebook request body:", req.body);
 
@@ -75,18 +88,7 @@ app.post("/facebook", function (req, res) {
     return;
   }
 
-  app.post("/riderdata", function (req, res) {
-    if (
-      req.query["hub.mode"] == "subscribe" &&
-      req.query["hub.verify_token"] == token
-    ) {
-      lstRidersync.unshift(req.body);
 
-      res.send(req.query["hub.challenge"]);
-    } else {
-      res.sendStatus(400);
-    }
-  });
 
   console.log("request header X-Hub-Signature validated");
   // Process the Facebook updates here
