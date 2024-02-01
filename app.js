@@ -76,8 +76,16 @@ app.post("/facebook", function (req, res) {
   }
 
   app.post("/riderdata", function (req, res) {
-    lstRidersync.unshift(req.body);
-    return;
+    if (
+      req.query["hub.mode"] == "subscribe" &&
+      req.query["hub.verify_token"] == token
+    ) {
+      lstRidersync.unshift(req.body);
+
+      res.send(req.query["hub.challenge"]);
+    } else {
+      res.sendStatus(400);
+    }
   });
 
   console.log("request header X-Hub-Signature validated");
